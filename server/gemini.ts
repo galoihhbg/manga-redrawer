@@ -38,7 +38,7 @@ export async function processMangaImage(
           ],
         },
       ],
-      responseModalities: ["IMAGE"],
+      responseModalities: ["IMAGE"] as any, // SDK type may not include all supported modalities
     });
 
     const candidates = response.candidates;

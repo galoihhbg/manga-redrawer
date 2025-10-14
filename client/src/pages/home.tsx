@@ -40,7 +40,7 @@ export default function Home() {
   };
 
   const processMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<ProcessImageResponse> => {
       if (!image || !apiKey) throw new Error("Missing image or API key");
 
       const reader = new FileReader();
@@ -49,7 +49,7 @@ export default function Home() {
         reader.readAsDataURL(image);
       });
 
-      const response = await apiRequest<ProcessImageResponse>(
+      const response = await apiRequest(
         "POST",
         "/api/process-image",
         {
@@ -59,9 +59,9 @@ export default function Home() {
         }
       );
 
-      return response;
+      return response as ProcessImageResponse;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: ProcessImageResponse) => {
       if (data.success && data.processedImage) {
         setProcessedImage(`data:image/png;base64,${data.processedImage}`);
         toast({
