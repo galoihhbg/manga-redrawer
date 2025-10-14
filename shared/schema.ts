@@ -1,18 +1,26 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+// Image processing request schema
+export const processImageSchema = z.object({
+  apiKey: z.string().min(1, "API key is required"),
+  image: z.string(), // base64 encoded image
+  mimeType: z.string(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
+export type ProcessImageRequest = z.infer<typeof processImageSchema>;
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+// Image processing response
+export interface ProcessImageResponse {
+  success: boolean;
+  processedImage?: string; // base64 encoded processed image
+  error?: string;
+}
+
+// Frontend state types
+export interface ImageData {
+  file: File;
+  preview: string;
+  processedImage?: string;
+  isProcessing?: boolean;
+  error?: string;
+}
