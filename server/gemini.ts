@@ -23,7 +23,7 @@ export async function processMangaImage(
 
     // Generate edited image using Gemini 2.0 Flash
     const response = await ai.models.generateContent({
-      model: "models/gemini-2.0-flash-preview-image-generation",
+      model: "models/gemini-2.5-flash-image",
       contents: [
         {
           role: "user",
@@ -38,8 +38,8 @@ export async function processMangaImage(
           ],
         },
       ],
-      responseModalities: ["IMAGE"] as any, // SDK type may not include all supported modalities
-    });
+      // SDK type may not include all supported modalities; cast the request to any to bypass type errors
+    } as any);
 
     const candidates = response.candidates;
     if (!candidates || candidates.length === 0) {
