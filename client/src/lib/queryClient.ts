@@ -1,9 +1,16 @@
+import { ProcessImageResponse } from "@shared/schema";
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    let errorMessage: string;
+    try {
+      const errorData = await res.json();
+      errorMessage = errorData.message || errorData.error || `HTTP error! status: ${res.status}`;
+    } catch {
+      errorMessage = `HTTP error! status: ${res.status}`;
+    }
+    throw new Error(errorMessage);
   }
 }
 
@@ -11,7 +18,7 @@ export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
-): Promise<Response> {
+): Promise<ProcessImageResponse> {
   const res = await fetch(url, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
@@ -19,8 +26,11 @@ export async function apiRequest(
     credentials: "include",
   });
 
-  await throwIfResNotOk(res);
-  return res;
+  const responseData = await res.json();
+  
+  await throwIfResNotOk(res)
+  
+  return responseData;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

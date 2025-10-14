@@ -59,7 +59,7 @@ export default function Home() {
         }
       );
 
-      return response as ProcessImageResponse;
+      return response as unknown as ProcessImageResponse;
     },
     onSuccess: (data: ProcessImageResponse) => {
       if (data.success && data.processedImage) {
