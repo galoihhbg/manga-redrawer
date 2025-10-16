@@ -1,7 +1,59 @@
 import { GoogleGenAI } from "@google/genai";
 
 // Referenced from javascript_gemini blueprint
-// Using Gemini 2.0 Flash for image editing capabilities
+// Using Gemini 2.5 Flash for image editing capabilities
+
+async function compositeImageWithMask(
+  imageBase64: string,
+  maskBase64: string,
+  mimeType: string
+): Promise<{ compositeBase64: string; mimeType: string }> {
+  // Create a composite image where masked regions are filled with a distinct color
+  // This gives Gemini a clear visual indication of what needs to be inpainted
+  const { createCanvas, loadImage } = await import("canvas");
+  
+  const imageBuffer = Buffer.from(imageBase64, "base64");
+  const maskBuffer = Buffer.from(maskBase64, "base64");
+  
+  const image = await loadImage(imageBuffer);
+  const mask = await loadImage(maskBuffer);
+  
+  const canvas = createCanvas(image.width, image.height);
+  const ctx = canvas.getContext("2d");
+  
+  // Draw original image
+  ctx.drawImage(image, 0, 0);
+  
+  // Get mask data
+  const maskCanvas = createCanvas(mask.width, mask.height);
+  const maskCtx = maskCanvas.getContext("2d");
+  maskCtx.drawImage(mask, 0, 0);
+  const maskData = maskCtx.getImageData(0, 0, mask.width, mask.height);
+  
+  // Get image data
+  const imageData = ctx.getImageData(0, 0, image.width, image.height);
+  
+  // Apply mask: where mask is white, fill with semi-transparent white overlay
+  for (let i = 0; i < maskData.data.length; i += 4) {
+    const maskValue = maskData.data[i]; // R channel (grayscale)
+    if (maskValue > 128) { // White region in mask
+      // Fill with white to indicate region to inpaint
+      imageData.data[i] = 255;     // R
+      imageData.data[i + 1] = 255; // G
+      imageData.data[i + 2] = 255; // B
+      // Keep alpha
+    }
+  }
+  
+  ctx.putImageData(imageData, 0, 0);
+  
+  // Convert to base64
+  const buffer = canvas.toBuffer("image/png");
+  return {
+    compositeBase64: buffer.toString("base64"),
+    mimeType: "image/png"
+  };
+}
 
 export async function processMangaImage(
   apiKey: string,
@@ -13,32 +65,20 @@ export async function processMangaImage(
 
   try {
     let prompt: string;
-    const parts: any[] = [
-      {
-        inlineData: {
-          data: imageBase64,
-          mimeType: mimeType,
-        },
-      },
-    ];
+    let imageToProcess = imageBase64;
+    let imageType = mimeType;
 
     if (maskBase64) {
-      parts.push({
-        inlineData: {
-          data: maskBase64,
-          mimeType: "image/png",
-        },
-      });
+      // Create a composite image with white regions indicating areas to inpaint
+      const composite = await compositeImageWithMask(imageBase64, maskBase64, mimeType);
+      imageToProcess = composite.compositeBase64;
+      imageType = composite.mimeType;
       
-      prompt = `You are a professional manga image editor. I'm providing you with two images:
-      1. The original manga image
-      2. A mask image where WHITE areas indicate regions that need to be edited/redrawn
-      
-      Please generate a new version of the manga image where ONLY the white-masked regions are edited. 
-      In these masked areas, remove any text, speech bubbles, or written characters, and naturally fill 
-      them with appropriate manga-style backgrounds, patterns, or art that seamlessly matches the surrounding 
-      area. The BLACK areas in the mask should remain EXACTLY as they are in the original image - do not 
-      modify them at all. Maintain the exact same art style, shading, line work, and composition throughout.`;
+      prompt = `You are a professional manga image editor. In this manga image, the WHITE/BLANK regions need to be filled in. 
+      These white areas should be naturally inpainted with appropriate manga-style backgrounds, patterns, or art that seamlessly 
+      matches the surrounding area. Look carefully at the art style, shading, and line work around each white region, then 
+      generate natural-looking content that fills these areas perfectly. The result should look like a complete, professional 
+      manga panel with no white gaps or obvious edits. Maintain the exact same art style throughout.`;
     } else {
       prompt = `You are a professional manga image editor. Look at this manga image carefully. 
       I need you to generate a new version of this exact same image, but with ALL text, speech bubbles, 
@@ -48,15 +88,21 @@ export async function processMangaImage(
       like a clean manga panel with no text whatsoever.`;
     }
 
-    parts.push({ text: prompt });
-
-    // Generate edited image using Gemini 2.0 Flash
+    // Generate edited image using Gemini 2.5 Flash
     const response = await ai.models.generateContent({
       model: "models/gemini-2.5-flash-image",
       contents: [
         {
           role: "user",
-          parts: parts,
+          parts: [
+            {
+              inlineData: {
+                data: imageToProcess,
+                mimeType: imageType,
+              },
+            },
+            { text: prompt },
+          ],
         },
       ],
       // SDK type may not include all supported modalities; cast the request to any to bypass type errors
