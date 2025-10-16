@@ -6,20 +6,49 @@ import { GoogleGenAI } from "@google/genai";
 export async function processMangaImage(
   apiKey: string,
   imageBase64: string,
-  mimeType: string
+  mimeType: string,
+  maskBase64?: string
 ): Promise<string> {
   const ai = new GoogleGenAI({ apiKey });
 
   try {
-    // Use Gemini 2.0 Flash with image editing prompt
-    // Note: This uses Gemini's image understanding + generation to create
-    // a version of the image without text
-    const prompt = `You are a professional manga image editor. Look at this manga image carefully. 
-    I need you to generate a new version of this exact same image, but with ALL text, speech bubbles, 
-    and written characters completely removed. The areas where text existed should be naturally filled 
-    in with appropriate manga-style backgrounds, patterns, or art that seamlessly matches the surrounding 
-    area. Maintain the exact same art style, shading, line work, and composition. The result should look 
-    like a clean manga panel with no text whatsoever.`;
+    let prompt: string;
+    const parts: any[] = [
+      {
+        inlineData: {
+          data: imageBase64,
+          mimeType: mimeType,
+        },
+      },
+    ];
+
+    if (maskBase64) {
+      parts.push({
+        inlineData: {
+          data: maskBase64,
+          mimeType: "image/png",
+        },
+      });
+      
+      prompt = `You are a professional manga image editor. I'm providing you with two images:
+      1. The original manga image
+      2. A mask image where WHITE areas indicate regions that need to be edited/redrawn
+      
+      Please generate a new version of the manga image where ONLY the white-masked regions are edited. 
+      In these masked areas, remove any text, speech bubbles, or written characters, and naturally fill 
+      them with appropriate manga-style backgrounds, patterns, or art that seamlessly matches the surrounding 
+      area. The BLACK areas in the mask should remain EXACTLY as they are in the original image - do not 
+      modify them at all. Maintain the exact same art style, shading, line work, and composition throughout.`;
+    } else {
+      prompt = `You are a professional manga image editor. Look at this manga image carefully. 
+      I need you to generate a new version of this exact same image, but with ALL text, speech bubbles, 
+      and written characters completely removed. The areas where text existed should be naturally filled 
+      in with appropriate manga-style backgrounds, patterns, or art that seamlessly matches the surrounding 
+      area. Maintain the exact same art style, shading, line work, and composition. The result should look 
+      like a clean manga panel with no text whatsoever.`;
+    }
+
+    parts.push({ text: prompt });
 
     // Generate edited image using Gemini 2.0 Flash
     const response = await ai.models.generateContent({
@@ -27,15 +56,7 @@ export async function processMangaImage(
       contents: [
         {
           role: "user",
-          parts: [
-            {
-              inlineData: {
-                data: imageBase64,
-                mimeType: mimeType,
-              },
-            },
-            { text: prompt },
-          ],
+          parts: parts,
         },
       ],
       // SDK type may not include all supported modalities; cast the request to any to bypass type errors
