@@ -49,6 +49,19 @@ export function MaskCanvas({ imageUrl, onMaskChange, className }: MaskCanvasProp
     img.src = imageUrl;
   }, [imageUrl]);
 
+  // Add keyboard shortcut for undo (Ctrl+Z / Cmd+Z)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        undo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo]);
+
   // Save state to history
   const saveState = useCallback(() => {
     const canvas = canvasRef.current;
