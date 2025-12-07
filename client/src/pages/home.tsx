@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Sparkles, AlertCircle } from "lucide-react";
+import { Sparkles, AlertCircle, Edit3 } from "lucide-react";
 import { ApiKeyInput } from "@/components/api-key-input";
 import { ImageUpload } from "@/components/image-upload";
 import { ImageComparison } from "@/components/image-comparison";
+import { PolygonEditor } from "@/components/polygon-editor";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
@@ -10,11 +11,18 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { ProcessImageResponse } from "@shared/schema";
 
+interface Point {
+  x: number;
+  y: number;
+}
+
 export default function Home() {
   const [apiKey, setApiKey] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [processedImage, setProcessedImage] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [maskData, setMaskData] = useState<{ polygons: Point[][], maskUrl: string } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -37,6 +45,8 @@ export default function Home() {
     setImage(null);
     setPreview(null);
     setProcessedImage(null);
+    setIsEditMode(false);
+    setMaskData(null);
   };
 
   const processMutation = useMutation({
@@ -49,14 +59,21 @@ export default function Home() {
         reader.readAsDataURL(image);
       });
 
+      const requestBody: any = {
+        apiKey,
+        image: base64.split(",")[1],
+        mimeType: image.type,
+      };
+
+      if (maskData) {
+        requestBody.mask = maskData.maskUrl.split(",")[1];
+        requestBody.polygons = maskData.polygons;
+      }
+
       const response = await apiRequest(
         "POST",
         "/api/process-image",
-        {
-          apiKey,
-          image: base64.split(",")[1],
-          mimeType: image.type,
-        }
+        requestBody
       );
 
       return response as unknown as ProcessImageResponse;
@@ -64,9 +81,13 @@ export default function Home() {
     onSuccess: (data: ProcessImageResponse) => {
       if (data.success && data.processedImage) {
         setProcessedImage(`data:image/png;base64,${data.processedImage}`);
+        setIsEditMode(false);
+        setMaskData(null);
         toast({
           title: "Success!",
-          description: "Your manga image has been processed successfully.",
+          description: maskData 
+            ? "Selected regions have been processed successfully." 
+            : "Your manga image has been processed successfully.",
         });
       } else {
         throw new Error(data.error || "Processing failed");
@@ -98,6 +119,18 @@ export default function Home() {
   };
 
   const canProcess = apiKey && image && !processMutation.isPending;
+
+  const handlePolygonComplete = (polygons: Point[][], maskUrl: string) => {
+    setMaskData({ polygons, maskUrl });
+    setIsEditMode(false);
+  };
+
+  const handleEditModeToggle = () => {
+    setIsEditMode(!isEditMode);
+    if (!isEditMode) {
+      setMaskData(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -135,12 +168,22 @@ export default function Home() {
               preview={preview}
               onImageSelect={handleImageSelect}
               onImageRemove={handleImageRemove}
-              disabled={!apiKey || processMutation.isPending}
+              disabled={!apiKey || processMutation.isPending || isEditMode}
             />
           </div>
 
-          {preview && (
-            <div className="flex justify-center">
+          {preview && !isEditMode && (
+            <div className="flex justify-center gap-4">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleEditModeToggle}
+                disabled={processMutation.isPending}
+              >
+                <Edit3 className="h-4 w-4 mr-2" />
+                Select Regions to Edit
+              </Button>
+              
               <Button
                 size="lg"
                 onClick={() => processMutation.mutate()}
@@ -153,14 +196,25 @@ export default function Home() {
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
-                    Process Image
+                    {maskData ? "Process Selected Regions" : "Process Entire Image"}
                   </>
                 )}
               </Button>
             </div>
           )}
 
-          {(preview || processedImage) && (
+          {preview && isEditMode && (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-semibold">Select Regions to Edit</h2>
+              <PolygonEditor
+                imageUrl={preview}
+                onPolygonComplete={handlePolygonComplete}
+                onCancel={() => setIsEditMode(false)}
+              />
+            </div>
+          )}
+
+          {(preview || processedImage) && !isEditMode && (
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold">Comparison</h2>
               <ImageComparison
