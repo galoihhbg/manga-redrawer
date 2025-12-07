@@ -38,7 +38,7 @@ interface AppState {
   resetImages: () => void;
 }
 
-const DEFAULT_ENDPOINT = 'https://api.replicate.com/v1/predictions';
+const DEFAULT_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta';
 
 export const useStore = create<AppState>((set) => ({
   // Initial settings

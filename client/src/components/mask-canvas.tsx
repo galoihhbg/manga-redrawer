@@ -54,60 +54,21 @@ export function MaskCanvas({ imageUrl, onMaskChange, className }: MaskCanvasProp
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
         e.preventDefault();
-        undo();
+        // Call undo directly without dependency
+        if (historyIndex <= 0) return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        const newIndex = historyIndex - 1;
+        ctx.putImageData(history[newIndex], 0, 0);
+        setHistoryIndex(newIndex);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo]);
-
-  // Save state to history
-  const saveState = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(imageData);
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
-  }, [history, historyIndex]);
-
-  // Undo action
-  const undo = useCallback(() => {
-    if (historyIndex <= 0) return;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const newIndex = historyIndex - 1;
-    ctx.putImageData(history[newIndex], 0, 0);
-    setHistoryIndex(newIndex);
-    
-    // Export mask
-    exportMask();
   }, [historyIndex, history]);
-
-  // Clear mask
-  const clearMask = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !imageRef.current) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(imageRef.current, 0, 0);
-    saveState();
-    exportMask();
-  }, [saveState]);
 
   // Export mask as base64
   const exportMask = useCallback(() => {
@@ -149,6 +110,53 @@ export function MaskCanvas({ imageUrl, onMaskChange, className }: MaskCanvasProp
     const maskBase64 = maskCanvas.toDataURL('image/png');
     onMaskChange(maskBase64);
   }, [onMaskChange]);
+
+  // Save state to history
+  const saveState = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(imageData);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  }, [history, historyIndex]);
+
+  // Undo action
+  const undo = useCallback(() => {
+    if (historyIndex <= 0) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const newIndex = historyIndex - 1;
+    ctx.putImageData(history[newIndex], 0, 0);
+    setHistoryIndex(newIndex);
+    
+    // Export mask
+    exportMask();
+  }, [historyIndex, history, exportMask]);
+
+  // Clear mask
+  const clearMask = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !imageRef.current) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(imageRef.current, 0, 0);
+    saveState();
+    exportMask();
+  }, [saveState, exportMask]);
 
   // Drawing functions
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {

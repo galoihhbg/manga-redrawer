@@ -7,7 +7,7 @@ export type RedrawMode = 'standard_bubble' | 'transparent_bubble' | 'narrative_b
 export interface AppSettings {
   apiKey: string;
   model: ModelType;
-  endpoint: string; // Cho phép custom endpoint
+  endpoint: string; // Allow custom endpoint configuration
 }
 
 export interface ProcessingParams {
