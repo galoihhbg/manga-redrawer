@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Settings, Sliders, MessageSquare } from 'lucide-react';
-import type { RedrawMode, ModelType } from '@/types/settings';
+import type { RedrawMode, ModelType, ProcessingParams } from '@/types/settings';
 import { MODE_PRESETS } from '@/types/settings';
 
 export function ControlSidebar() {
@@ -200,7 +200,7 @@ export function ControlSidebar() {
                   <Select
                     value={params.maskContent}
                     onValueChange={(value) =>
-                      updateParams({ maskContent: value as any })
+                      updateParams({ maskContent: value as ProcessingParams['maskContent'] })
                     }
                   >
                     <SelectTrigger id="maskContent">
@@ -219,7 +219,7 @@ export function ControlSidebar() {
                   <Select
                     value={params.inpaintArea}
                     onValueChange={(value) =>
-                      updateParams({ inpaintArea: value as any })
+                      updateParams({ inpaintArea: value as ProcessingParams['inpaintArea'] })
                     }
                   >
                     <SelectTrigger id="inpaintArea">

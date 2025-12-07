@@ -16,18 +16,15 @@ import {
 } from 'react-compare-slider';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 
+import type { ProcessImageResponse } from '@shared/schema';
+import type { ProcessingParams } from '@/types/settings';
+
 interface ProcessImageRequest {
   apiKey: string;
   image: string;
   mask: string;
   mimeType: string;
-  params: any;
-}
-
-interface ProcessImageResponse {
-  success: boolean;
-  processedImage?: string;
-  error?: string;
+  params: ProcessingParams;
 }
 
 export default function HomeNew() {
