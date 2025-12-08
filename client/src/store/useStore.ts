@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { RedrawMode, ProcessingParams, ModelType } from '@/types/settings';
-import { MODE_PRESETS } from '@/types/settings';
+import { PRESETS } from '@/lib/presets';
 
 interface ImageState {
   originalImage: File | null;
@@ -40,6 +40,9 @@ interface AppState {
 
 const DEFAULT_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta';
 
+// Get initial parameters from standard bubble preset
+const initialPreset = PRESETS.standard_bubble;
+
 export const useStore = create<AppState>((set) => ({
   // Initial settings
   apiKey: '',
@@ -48,7 +51,15 @@ export const useStore = create<AppState>((set) => ({
   
   // Initial mode - Standard Bubble
   selectedMode: 'standard_bubble',
-  params: MODE_PRESETS.standard_bubble.params,
+  params: {
+    prompt: initialPreset.positivePrompt,
+    negativePrompt: initialPreset.negativePrompt,
+    denoisingStrength: initialPreset.denoisingStrength,
+    maskBlur: initialPreset.maskBlur,
+    padding: initialPreset.padding,
+    maskContent: initialPreset.maskContent,
+    inpaintArea: initialPreset.inpaintArea,
+  },
   
   // Initial image state
   images: {
@@ -67,10 +78,7 @@ export const useStore = create<AppState>((set) => ({
   
   setEndpoint: (endpoint) => set({ endpoint }),
   
-  setMode: (mode) => set({ 
-    selectedMode: mode,
-    params: MODE_PRESETS[mode].params,
-  }),
+  setMode: (mode) => set({ selectedMode: mode }),
   
   updateParams: (newParams) => set((state) => ({
     params: { ...state.params, ...newParams },
