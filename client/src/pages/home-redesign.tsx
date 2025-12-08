@@ -227,30 +227,33 @@ export default function Home() {
             )}
 
             {images.processedImage && (
-              <div className="h-full p-8 overflow-auto bg-muted/20">
-                <div className="max-w-5xl mx-auto">
+              <div className="h-full w-full overflow-auto bg-muted/20 p-8">
+                <div className="w-full h-full flex flex-col items-center">
                   <div className="mb-4">
                     <h2 className="text-lg font-semibold">Comparison View</h2>
                     <p className="text-sm text-muted-foreground">
                       Drag the slider to compare before and after
                     </p>
                   </div>
-                  <div className="rounded-lg overflow-hidden border shadow-xl" style={{ height: '600px' }}>
+                  <div className="rounded-lg overflow-hidden border shadow-xl w-full max-w-none" style={{ maxHeight: 'calc(100vh - 250px)' }}>
                     <ReactCompareSlider
                       itemOne={
                         <ReactCompareSliderImage
                           src={images.originalPreview!}
                           alt="Original"
+                          style={{ objectFit: 'contain', width: '100%', height: '100%' }}
                         />
                       }
                       itemTwo={
                         <ReactCompareSliderImage
                           src={images.processedImage}
                           alt="Processed"
+                          style={{ objectFit: 'contain', width: '100%', height: '100%' }}
                         />
                       }
                       style={{
                         height: '100%',
+                        minHeight: '400px',
                       }}
                     />
                   </div>

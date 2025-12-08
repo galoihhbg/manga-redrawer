@@ -192,38 +192,26 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
       if (e.key === 'e' || e.key === 'E') {
         setTool('eraser');
       }
-      // Space for panning
-      if (e.key === ' ' && !isPanning) {
-        e.preventDefault();
-        setIsPanning(true);
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === ' ') {
-        setIsPanning(false);
-      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [undo, redo, isPanning]);
+  }, [undo, redo]);
 
   // Drawing functions
   const getCanvasCoordinates = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const maskCanvas = maskCanvasRef.current;
-    if (!maskCanvas || !transformRef.current) return null;
+    if (!maskCanvas) return null;
 
     const rect = maskCanvas.getBoundingClientRect();
-    const { state } = transformRef.current;
     
-    // Account for zoom and pan
-    const x = (e.clientX - rect.left - state.positionX) / state.scale;
-    const y = (e.clientY - rect.top - state.positionY) / state.scale;
+    // Calculate coordinates relative to canvas (accounting for scaling)
+    const scaleX = maskCanvas.width / rect.width;
+    const scaleY = maskCanvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
     
     return { x, y };
   };
@@ -258,9 +246,21 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
   };
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (isPanning) return;
+    // Only start drawing if left mouse button and not right-click panning
+    if (e.button !== 0) return;
+    
+    // Prevent panning while drawing
+    e.stopPropagation();
+    
     setIsDrawing(true);
     draw(e);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (isDrawing) {
+      e.stopPropagation(); // Prevent panning while drawing
+      draw(e);
+    }
   };
 
   const stopDrawing = () => {
@@ -279,7 +279,11 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
         minScale={0.1}
         maxScale={10}
         wheel={{ step: 0.1 }}
-        panning={{ disabled: !isPanning }}
+        panning={{ 
+          disabled: false,
+          velocityDisabled: true,
+        }}
+        doubleClick={{ disabled: true }}
         onZoom={(ref) => setZoom(ref.state.scale)}
       >
         {({ zoomIn, zoomOut, resetTransform }) => (
@@ -304,31 +308,34 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
               wrapperStyle={{
                 width: '100%',
                 height: '100%',
-                cursor: isPanning ? 'grab' : tool === 'brush' ? 'crosshair' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              <div className="relative inline-block">
+              <div className="relative" style={{ width: 'fit-content', height: 'fit-content' }}>
                 {/* Base image canvas */}
                 <canvas
                   ref={canvasRef}
-                  className="absolute top-0 left-0"
+                  className="block"
                   style={{ pointerEvents: 'none' }}
                 />
                 
                 {/* Mask canvas (semi-transparent red overlay) */}
                 <canvas
                   ref={maskCanvasRef}
-                  className="absolute top-0 left-0"
+                  className="absolute top-0 left-0 block"
                   onMouseDown={startDrawing}
-                  onMouseMove={draw}
+                  onMouseMove={handleMouseMove}
                   onMouseUp={stopDrawing}
                   onMouseLeave={stopDrawing}
                   style={{
-                    cursor: isPanning 
-                      ? 'grab' 
+                    cursor: isDrawing
+                      ? 'crosshair'
                       : tool === 'brush' 
                         ? getBrushCursor(brushSize)
-                        : 'pointer'
+                        : 'default',
+                    pointerEvents: 'auto',
                   }}
                 />
               </div>
