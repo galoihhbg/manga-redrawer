@@ -9,6 +9,14 @@ interface InteractiveCanvasProps {
   className?: string;
 }
 
+// Utility function to generate brush cursor SVG
+const getBrushCursor = (size: number): string => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${size/2-1}" fill="none" stroke="red" stroke-width="2"/>
+  </svg>`;
+  return `url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}') ${size/2} ${size/2}, crosshair`;
+};
+
 export function InteractiveCanvas({ imageUrl, onMaskChange, className }: InteractiveCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const maskCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -319,7 +327,7 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
                     cursor: isPanning 
                       ? 'grab' 
                       : tool === 'brush' 
-                        ? `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="${brushSize}" height="${brushSize}"><circle cx="${brushSize/2}" cy="${brushSize/2}" r="${brushSize/2-1}" fill="none" stroke="red" stroke-width="2"/></svg>') ${brushSize/2} ${brushSize/2}, crosshair`
+                        ? getBrushCursor(brushSize)
                         : 'pointer'
                   }}
                 />

@@ -26,7 +26,7 @@ export function RightSidebar() {
   const handlePresetChange = (presetKey: string) => {
     const preset = PRESETS[presetKey as PresetKey];
     if (preset) {
-      setMode(preset.mode as any);
+      setMode(preset.mode);
       // Update all parameters from the preset
       updateParams({
         prompt: preset.positivePrompt,
