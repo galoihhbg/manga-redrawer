@@ -43,7 +43,7 @@ Technical Parameters:
 - Mask Content Mode: ${params.maskContent}
 - Inpaint Area: ${params.inpaintArea}
 
-${maskBase64 ? 'A mask image is provided showing the areas to inpaint (white regions should be filled).' : 'Remove all text and speech bubbles you detect.'}
+${maskBase64 ? 'A mask image is provided showing the areas to inpaint (white regions should be filled).' : 'Remove all text you detect.'}
 
 Generate a seamless, high-quality manga image that looks natural and maintains the original art style.`;
     }
@@ -71,7 +71,7 @@ Generate a seamless, high-quality manga image that looks natural and maintains t
 
     // Generate edited image using Gemini 2.0 Flash
     const response = await ai.models.generateContent({
-      model: "models/gemini-2.5-flash-image",
+      model: "models/gemini-3-pro-image-preview",
       contents: [
         {
           role: "user",
