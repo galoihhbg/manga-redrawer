@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import type { ProcessingParams } from "@shared/schema";
 
 // Referenced from javascript_gemini blueprint
 // Using Gemini 2.0 Flash for image editing capabilities
@@ -6,36 +7,75 @@ import { GoogleGenAI } from "@google/genai";
 export async function processMangaImage(
   apiKey: string,
   imageBase64: string,
-  mimeType: string
+  mimeType: string,
+  maskBase64?: string,
+  params?: ProcessingParams
 ): Promise<string> {
   const ai = new GoogleGenAI({ apiKey });
 
   try {
-    // Use Gemini 2.0 Flash with image editing prompt
-    // Note: This uses Gemini's image understanding + generation to create
-    // a version of the image without text
-    const prompt = `You are a professional manga image editor. Look at this manga image carefully. 
+    // Use custom prompt if provided, otherwise use default
+    const defaultPrompt = `You are a professional manga image editor. Look at this manga image carefully. 
     I need you to generate a new version of this exact same image, but with ALL text, speech bubbles, 
     and written characters completely removed. The areas where text existed should be naturally filled 
     in with appropriate manga-style backgrounds, patterns, or art that seamlessly matches the surrounding 
     area. Maintain the exact same art style, shading, line work, and composition. The result should look 
     like a clean manga panel with no text whatsoever.`;
 
+    let prompt = defaultPrompt;
+    
+    if (params) {
+      // Build a comprehensive prompt using the provided parameters
+      prompt = `You are a professional manga image editor using advanced inpainting techniques.
+
+Task: Generate a new version of this manga image with text removed from the masked areas.
+
+Positive Requirements:
+${params.prompt}
+
+Things to Avoid:
+${params.negativePrompt}
+
+Technical Parameters:
+- Denoising Strength: ${params.denoisingStrength} (higher = more aggressive changes)
+- Mask Blur: ${params.maskBlur}px (edge softness)
+- Padding: ${params.padding}px (extra context area)
+- Mask Content Mode: ${params.maskContent}
+- Inpaint Area: ${params.inpaintArea}
+
+${maskBase64 ? 'A mask image is provided showing the areas to inpaint (white regions should be filled).' : 'Remove all text you detect.'}
+
+Generate a seamless, high-quality manga image that looks natural and maintains the original art style.`;
+    }
+
+    const parts: any[] = [
+      {
+        inlineData: {
+          data: imageBase64,
+          mimeType: mimeType,
+        },
+      },
+    ];
+
+    // Add mask if provided
+    if (maskBase64) {
+      parts.push({
+        inlineData: {
+          data: maskBase64,
+          mimeType: "image/png",
+        },
+      });
+    }
+
+    parts.push({ text: prompt });
+
     // Generate edited image using Gemini 2.0 Flash
     const response = await ai.models.generateContent({
-      model: "models/gemini-2.5-flash-image",
+      model: "models/gemini-3-pro-image-preview",
       contents: [
         {
           role: "user",
-          parts: [
-            {
-              inlineData: {
-                data: imageBase64,
-                mimeType: mimeType,
-              },
-            },
-            { text: prompt },
-          ],
+          parts,
         },
       ],
       // SDK type may not include all supported modalities; cast the request to any to bypass type errors

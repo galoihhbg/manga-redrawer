@@ -4778,6 +4778,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ky@npm:^1.14.0":
+  version: 1.14.0
+  resolution: "ky@npm:1.14.0"
+  checksum: 10c0/ae30950feaa863fd95854bc0f528a04a36fa04828c119b098c5a0933a46126ccaee829ec0d6d6fc968faa4d0a23501c3203534d024d60540541d322d9772983d
+  languageName: node
+  linkType: hard
+
 "lightningcss-darwin-arm64@npm:1.30.1":
   version: 1.30.1
   resolution: "lightningcss-darwin-arm64@npm:1.30.1"
@@ -5831,6 +5838,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-compare-slider@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "react-compare-slider@npm:3.1.0"
+  peerDependencies:
+    react: ">=16.8"
+    react-dom: ">=16.8"
+  checksum: 10c0/c111a5440647f3db137678cc19871e17dfff0a0e8d8c40bbbc9b02a1dd58a2a41c9bc94b360aebf388fe34ac922f29d162bf4770aeee6db5c31b9195a9f745c6
+  languageName: node
+  linkType: hard
+
 "react-day-picker@npm:^8.10.1":
   version: 8.10.1
   resolution: "react-day-picker@npm:8.10.1"
@@ -5992,6 +6009,16 @@ __metadata:
     react: ">=16.6.0"
     react-dom: ">=16.6.0"
   checksum: 10c0/2ba754ba748faefa15f87c96dfa700d5525054a0141de8c75763aae6734af0740e77e11261a1e8f4ffc08fd9ab78510122e05c21c2d79066c38bb6861a886c82
+  languageName: node
+  linkType: hard
+
+"react-zoom-pan-pinch@npm:^3.7.0":
+  version: 3.7.0
+  resolution: "react-zoom-pan-pinch@npm:3.7.0"
+  peerDependencies:
+    react: "*"
+    react-dom: "*"
+  checksum: 10c0/96889849800a953128fe7f9e42bed0d5cbc48d03024995b136f5e972146236688efb24d7381d8e6f09598f5512b4897d2420f62d828a665fdf24b745b7d55911
   languageName: node
   linkType: hard
 
@@ -6157,6 +6184,7 @@ __metadata:
     express-session: "npm:^1.18.1"
     framer-motion: "npm:^11.13.1"
     input-otp: "npm:^1.4.2"
+    ky: "npm:^1.14.0"
     lucide-react: "npm:^0.453.0"
     memorystore: "npm:^1.6.7"
     next-themes: "npm:^0.4.6"
@@ -6164,12 +6192,14 @@ __metadata:
     passport-local: "npm:^1.0.0"
     postcss: "npm:^8.4.47"
     react: "npm:^18.3.1"
+    react-compare-slider: "npm:^3.1.0"
     react-day-picker: "npm:^8.10.1"
     react-dom: "npm:^18.3.1"
     react-dropzone: "npm:^14.3.8"
     react-hook-form: "npm:^7.55.0"
     react-icons: "npm:^5.4.0"
     react-resizable-panels: "npm:^2.1.7"
+    react-zoom-pan-pinch: "npm:^3.7.0"
     recharts: "npm:^2.15.2"
     tailwind-merge: "npm:^2.6.0"
     tailwindcss: "npm:^3.4.17"
@@ -6183,6 +6213,7 @@ __metadata:
     ws: "npm:^8.18.0"
     zod: "npm:^3.24.2"
     zod-validation-error: "npm:^3.4.0"
+    zustand: "npm:^5.0.9"
   dependenciesMeta:
     bufferutil:
       optional: true
@@ -7132,5 +7163,26 @@ __metadata:
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
   checksum: 10c0/5718ec35e3c40b600316c5b4c5e4976f7fee68151bc8f8d90ec18a469be9571f072e1bbaace10f1e85cf8892ea12d90821b200e980ab46916a6166a4260a983c
+  languageName: node
+  linkType: hard
+
+"zustand@npm:^5.0.9":
+  version: 5.0.9
+  resolution: "zustand@npm:5.0.9"
+  peerDependencies:
+    "@types/react": ">=18.0.0"
+    immer: ">=9.0.6"
+    react: ">=18.0.0"
+    use-sync-external-store: ">=1.2.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    immer:
+      optional: true
+    react:
+      optional: true
+    use-sync-external-store:
+      optional: true
+  checksum: 10c0/552849e4546c7760704d6509a5c412d57c62a1fa9e53169c939ba5e3d75f8cb3df50a64c3a22e6c3f1c8cc00de7543e4edd61ab5ae0c9169ba9a98e28303aba6
   languageName: node
   linkType: hard

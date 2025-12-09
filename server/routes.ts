@@ -17,13 +17,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } as ProcessImageResponse);
       }
 
-      const { apiKey, image, mimeType } = validation.data;
+      const { apiKey, image, mask, mimeType, params } = validation.data;
 
       // Process image with Gemini
       const processedImageBase64 = await processMangaImage(
         apiKey,
         image,
-        mimeType
+        mimeType,
+        mask,
+        params
       );
 
       res.json({
