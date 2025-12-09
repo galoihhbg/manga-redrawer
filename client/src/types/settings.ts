@@ -1,6 +1,8 @@
 // types/settings.ts
 
-export type ModelType = 'nano-banana-pro' | 'stable-diffusion-standard';
+export type ModelType =  
+  | 'models/gemini-2.5-flash-image'
+  | 'models/gemini-3-pro-image-preview' 
 
 export type RedrawMode = 'standard_bubble' | 'transparent_bubble' | 'narrative_box';
 

@@ -9,9 +9,13 @@ export async function processMangaImage(
   imageBase64: string,
   mimeType: string,
   maskBase64?: string,
-  params?: ProcessingParams
+  params?: ProcessingParams,
+  modelName?: string
 ): Promise<string> {
   const ai = new GoogleGenAI({ apiKey });
+
+  // Default to gemini-2.5-flash-image if no model specified
+  const model = modelName || "models/gemini-3-pro-image-preview";
 
   try {
     // Use custom prompt if provided, otherwise use default
@@ -69,9 +73,9 @@ Generate a seamless, high-quality manga image that looks natural and maintains t
 
     parts.push({ text: prompt });
 
-    // Generate edited image using Gemini 2.0 Flash
+    // Generate edited image using the selected model
     const response = await ai.models.generateContent({
-      model: "models/gemini-3-pro-image-preview",
+      model: model,
       contents: [
         {
           role: "user",

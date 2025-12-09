@@ -23,12 +23,14 @@ interface ProcessImageRequest {
   image: string;
   mask: string;
   mimeType: string;
+  model: string;
   params: ProcessingParams;
 }
 
 export default function Home() {
   const {
     apiKey,
+    model,
     setApiKey,
     images,
     params,
@@ -88,6 +90,7 @@ export default function Home() {
         image: base64.split(',')[1],
         mask: images.maskData.split(',')[1],
         mimeType: images.originalImage.type,
+        model,
         params,
       };
 

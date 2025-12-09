@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { 
   Paintbrush, 
   Eraser, 
+  Hand,
   Undo, 
   Redo, 
   RotateCcw, 
@@ -15,8 +16,8 @@ import {
 
 interface FloatingToolbarProps {
   // Brush controls
-  tool: 'brush' | 'eraser';
-  onToolChange: (tool: 'brush' | 'eraser') => void;
+  tool: 'brush' | 'eraser' | 'pan';
+  onToolChange: (tool: 'brush' | 'eraser' | 'pan') => void;
   brushSize: number;
   onBrushSizeChange: (size: number) => void;
   
@@ -54,6 +55,14 @@ export function FloatingToolbar({
       <div className="flex items-center gap-3">
         {/* Drawing Tools */}
         <div className="flex items-center gap-1">
+          <Button
+            variant={tool === 'pan' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => onToolChange('pan')}
+            title="Pan/Move (H)"
+          >
+            <Hand className="h-4 w-4" />
+          </Button>
           <Button
             variant={tool === 'brush' ? 'default' : 'ghost'}
             size="sm"
