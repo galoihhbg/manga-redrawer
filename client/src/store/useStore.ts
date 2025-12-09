@@ -46,7 +46,7 @@ const initialPreset = PRESETS.standard_bubble;
 export const useStore = create<AppState>((set) => ({
   // Initial settings
   apiKey: '',
-  model: 'nano-banana-pro',
+  model: 'models/gemini-3-pro-image-preview',
   endpoint: DEFAULT_ENDPOINT,
   
   // Initial mode - Standard Bubble

@@ -17,6 +17,7 @@ export const processImageSchema = z.object({
   image: z.string(), // base64 encoded image
   mask: z.string().optional(), // base64 encoded mask (optional for backward compatibility)
   mimeType: z.string(),
+  model: z.string().optional(), // AI model to use
   params: processingParamsSchema.optional(),
 });
 

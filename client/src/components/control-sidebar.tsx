@@ -49,8 +49,8 @@ export function ControlSidebar() {
                 <SelectValue placeholder="Select model" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="nano-banana-pro">Nano Banana Pro</SelectItem>
-                <SelectItem value="stable-diffusion-standard">Stable Diffusion Standard</SelectItem>
+                <SelectItem value="models/gemini-2.5-flash-image">Gemini 2.5 Flash Image</SelectItem>
+                <SelectItem value="models/gemini-3-pro-image-preview">Nano Banana Pro</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -25,7 +25,7 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
   
   const [isDrawing, setIsDrawing] = useState(false);
   const [brushSize, setBrushSize] = useState(20);
-  const [tool, setTool] = useState<'brush' | 'eraser'>('brush');
+  const [tool, setTool] = useState<'brush' | 'eraser' | 'pan'>('brush');
   const [history, setHistory] = useState<ImageData[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [zoom, setZoom] = useState(1);
@@ -192,6 +192,10 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
       if (e.key === 'e' || e.key === 'E') {
         setTool('eraser');
       }
+      // Pan tool: H
+      if (e.key === 'h' || e.key === 'H') {
+        setTool('pan');
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -249,6 +253,9 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
     // Only start drawing if left mouse button and not right-click panning
     if (e.button !== 0) return;
     
+    // Don't draw when pan tool is active
+    if (tool === 'pan') return;
+    
     // Prevent panning while drawing
     e.stopPropagation();
     
@@ -257,7 +264,7 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (isDrawing) {
+    if (isDrawing && tool !== 'pan') {
       e.stopPropagation(); // Prevent panning while drawing
       draw(e);
     }
@@ -280,7 +287,7 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
         maxScale={10}
         wheel={{ step: 0.1 }}
         panning={{ 
-          disabled: false,
+          disabled: tool !== 'pan',
           velocityDisabled: true,
         }}
         doubleClick={{ disabled: true }}
@@ -338,7 +345,9 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
                   onMouseUp={stopDrawing}
                   onMouseLeave={stopDrawing}
                   style={{
-                    cursor: isDrawing
+                    cursor: tool === 'pan'
+                      ? 'grab'
+                      : isDrawing
                       ? 'crosshair'
                       : tool === 'brush' 
                         ? getBrushCursor(brushSize)

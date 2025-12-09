@@ -17,7 +17,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } as ProcessImageResponse);
       }
 
-      const { apiKey, image, mask, mimeType, params } = validation.data;
+      const { apiKey, image, mask, mimeType, params, model } = validation.data;
 
       // Process image with Gemini
       const processedImageBase64 = await processMangaImage(
@@ -25,7 +25,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         image,
         mimeType,
         mask,
-        params
+        params,
+        model
       );
 
       res.json({
