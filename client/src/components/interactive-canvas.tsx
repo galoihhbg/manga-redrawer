@@ -272,7 +272,7 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
   };
 
   return (
-    <div className={cn('relative w-full h-full overflow-hidden bg-checkered', className)}>
+    <div className={cn('relative w-full h-full bg-checkered', className)} style={{ overflow: 'hidden' }}>
       <TransformWrapper
         ref={transformRef}
         initialScale={1}
@@ -285,6 +285,8 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
         }}
         doubleClick={{ disabled: true }}
         onZoom={(ref) => setZoom(ref.state.scale)}
+        limitToBounds={false}
+        centerOnInit={false}
       >
         {({ zoomIn, zoomOut, resetTransform }) => (
           <>
@@ -308,17 +310,23 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
               wrapperStyle={{
                 width: '100%',
                 height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                overflow: 'visible',
+              }}
+              contentStyle={{
+                display: 'inline-block',
               }}
             >
-              <div className="relative" style={{ width: 'fit-content', height: 'fit-content' }}>
+              <div className="relative" style={{ display: 'inline-block' }}>
                 {/* Base image canvas */}
                 <canvas
                   ref={canvasRef}
                   className="block"
-                  style={{ pointerEvents: 'none' }}
+                  style={{ 
+                    pointerEvents: 'none',
+                    display: 'block',
+                    maxWidth: 'none',
+                    maxHeight: 'none',
+                  }}
                 />
                 
                 {/* Mask canvas (semi-transparent red overlay) */}
@@ -336,6 +344,9 @@ export function InteractiveCanvas({ imageUrl, onMaskChange, className }: Interac
                         ? getBrushCursor(brushSize)
                         : 'default',
                     pointerEvents: 'auto',
+                    display: 'block',
+                    maxWidth: 'none',
+                    maxHeight: 'none',
                   }}
                 />
               </div>

@@ -220,10 +220,13 @@ export default function Home() {
             )}
 
             {images.originalPreview && !images.processedImage && (
-              <InteractiveCanvas
-                imageUrl={images.originalPreview}
-                onMaskChange={handleMaskChange}
-              />
+              <div className="absolute inset-0">
+                <InteractiveCanvas
+                  imageUrl={images.originalPreview}
+                  onMaskChange={handleMaskChange}
+                  className="w-full h-full"
+                />
+              </div>
             )}
 
             {images.processedImage && (
