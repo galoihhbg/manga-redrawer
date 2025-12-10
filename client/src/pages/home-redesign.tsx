@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Download, RotateCcw, ImagePlus } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { ApiKeyInput } from '@/components/api-key-input';
 import { ImageUpload } from '@/components/image-upload';
@@ -136,6 +136,26 @@ export default function Home() {
     });
   };
 
+  const handleRegenerate = () => {
+    if (!images.originalImage || !images.maskData) return;
+    
+    // Clear processed image to return to mask editing mode
+    setProcessedImage(null);
+    
+    toast({
+      title: 'Ready to regenerate',
+      description: 'You can adjust the mask and generate again.',
+    });
+  };
+
+  const handleNewImage = () => {
+    resetImages();
+    toast({
+      title: 'Ready for new image',
+      description: 'Please select a new manga image to process.',
+    });
+  };
+
   const canProcess = apiKey && images.originalImage && images.maskData && !isProcessing;
 
   return (
@@ -157,29 +177,46 @@ export default function Home() {
             </div>
 
             {images.originalPreview && !images.processedImage && (
-              <Button
-                size="lg"
-                onClick={() => processMutation.mutate()}
-                disabled={!canProcess}
-                className="min-w-40"
-              >
-                {isProcessing ? (
-                  <>Processing...</>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Generate Redraw
-                  </>
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  size="lg"
+                  onClick={() => processMutation.mutate()}
+                  disabled={!canProcess}
+                  className="min-w-40"
+                >
+                  {isProcessing ? (
+                    <>Processing...</>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generate Redraw
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  onClick={handleNewImage} 
+                  size="lg" 
+                  variant="outline"
+                  disabled={isProcessing}
+                >
+                  <ImagePlus className="h-4 w-4 mr-2" />
+                  New Image
+                </Button>
+              </div>
             )}
 
             {images.processedImage && (
               <div className="flex gap-2">
-                <Button onClick={handleDownload} size="lg">
+                <Button onClick={handleDownload} size="lg" variant="default">
+                  <Download className="h-4 w-4 mr-2" />
                   Download Result
                 </Button>
-                <Button variant="outline" size="lg" onClick={handleImageRemove}>
+                <Button onClick={handleRegenerate} size="lg" variant="outline">
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Regenerate
+                </Button>
+                <Button onClick={handleNewImage} size="lg" variant="outline">
+                  <ImagePlus className="h-4 w-4 mr-2" />
                   New Image
                 </Button>
               </div>
