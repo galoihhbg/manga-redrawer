@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Pencil, RotateCcw } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { ApiKeyInput } from '@/components/api-key-input';
 import { ImageUpload } from '@/components/image-upload';
@@ -137,6 +137,25 @@ export default function HomeNew() {
     });
   };
 
+  const handleRegenerate = () => {
+    if (!images.originalImage || !images.maskData) return;
+    
+    // Re-process with existing mask
+    processMutation.mutate();
+  };
+
+  const handleEditMask = () => {
+    if (!images.originalImage || !images.maskData) return;
+    
+    // Clear processed image to return to mask editing mode
+    setProcessedImage(null);
+    
+    toast({
+      title: 'Edit Mode',
+      description: 'You can now adjust the mask before regenerating.',
+    });
+  };
+
   const canProcess = apiKey && images.originalImage && images.maskData && !isProcessing;
 
   return (
@@ -260,6 +279,14 @@ export default function HomeNew() {
                       </div>
                       <div className="flex gap-2">
                         <Button onClick={handleDownload}>Download Result</Button>
+                        <Button onClick={handleRegenerate} variant="default" disabled={isProcessing}>
+                          <RotateCcw className="h-4 w-4 mr-2" />
+                          {isProcessing ? 'Processing...' : 'Regenerate'}
+                        </Button>
+                        <Button onClick={handleEditMask} variant="outline">
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Edit Mask
+                        </Button>
                         <Button variant="outline" onClick={handleImageRemove}>
                           New Image
                         </Button>

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Sparkles, Download, RotateCcw, ImagePlus } from 'lucide-react';
+import { Sparkles, Download, RotateCcw, ImagePlus, Pencil } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { ApiKeyInput } from '@/components/api-key-input';
 import { ImageUpload } from '@/components/image-upload';
@@ -139,12 +139,19 @@ export default function Home() {
   const handleRegenerate = () => {
     if (!images.originalImage || !images.maskData) return;
     
+    // Re-process with existing mask
+    processMutation.mutate();
+  };
+
+  const handleEditMask = () => {
+    if (!images.originalImage || !images.maskData) return;
+    
     // Clear processed image to return to mask editing mode
     setProcessedImage(null);
     
     toast({
-      title: 'Ready to regenerate',
-      description: 'You can adjust the mask and generate again.',
+      title: 'Edit Mode',
+      description: 'You can now adjust the mask before regenerating.',
     });
   };
 
@@ -211,9 +218,13 @@ export default function Home() {
                   <Download className="h-4 w-4 mr-2" />
                   Download Result
                 </Button>
-                <Button onClick={handleRegenerate} size="lg" variant="outline">
+                <Button onClick={handleRegenerate} size="lg" variant="default" disabled={isProcessing}>
                   <RotateCcw className="h-4 w-4 mr-2" />
-                  Regenerate
+                  {isProcessing ? 'Processing...' : 'Regenerate'}
+                </Button>
+                <Button onClick={handleEditMask} size="lg" variant="outline">
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit Mask
                 </Button>
                 <Button onClick={handleNewImage} size="lg" variant="outline">
                   <ImagePlus className="h-4 w-4 mr-2" />
